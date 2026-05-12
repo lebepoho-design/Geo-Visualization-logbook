@@ -13,6 +13,22 @@
 | [resources](resources/README.md) | 数据、工具、参考资料 |
 | [experiments](experiments/README.md) | 小实验、流程验证、可视化草稿 |
 
+## 快速导入笔记
+
+把 Notion 导出的 `.zip` 放进 `inbox/`，然后运行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Tags "QGIS, DEM, Photoshop"
+```
+
+脚本会自动读取 Notion Markdown 标题，整理到 `notes/YYYY/YYYY-MM-DD-topic/`，压缩图片，修正图片路径，更新笔记索引，并自动 commit + push。
+
+如果想先检查再上传，加 `-NoPush`：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Tags "QGIS, DEM" -NoPush
+```
+
 ## 记录原则
 
 - 一篇笔记一个文件夹，正文使用 `README.md`，图片放入同级 `assets/`。

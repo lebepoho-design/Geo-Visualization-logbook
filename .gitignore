@@ -3,6 +3,11 @@
 Thumbs.db
 desktop.ini
 
+# Raw drop zone. Keep the guide, ignore imported source files.
+inbox/*
+!inbox/README.md
+.import-tmp/
+
 # Temporary files
 *.tmp
 *.temp
