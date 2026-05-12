@@ -1,0 +1,19 @@
+*.baiduyun.uploading.cfg
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Large local design/source files should stay outside this logbook by default.
+*.psd
+*.psb
+*.ai
+*.indd
+*.tif
+*.tiff
+*.mp4
+*.mov
