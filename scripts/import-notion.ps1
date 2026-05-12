@@ -9,8 +9,10 @@
     [string]$Date = (Get-Date -Format "yyyy-MM-dd"),
     [string]$Status = "进行中",
     [string]$Tags = "",
-    [int]$MaxImageWidth = 1800,
-    [int]$JpegQuality = 82,
+    [int]$MaxImageWidth = 1400,
+    [int]$JpegQuality = 78,
+    [int]$TargetImageKB = 350,
+    [int]$MinJpegQuality = 52,
     [switch]$NoPush
 )
 
@@ -25,7 +27,9 @@ $argsList = @(
     "-Date", $Date,
     "-Status", $Status,
     "-MaxImageWidth", $MaxImageWidth,
-    "-JpegQuality", $JpegQuality
+    "-JpegQuality", $JpegQuality,
+    "-TargetImageKB", $TargetImageKB,
+    "-MinJpegQuality", $MinJpegQuality
 )
 
 if (-not [string]::IsNullOrWhiteSpace($Title)) {

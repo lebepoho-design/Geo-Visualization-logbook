@@ -9,8 +9,10 @@
     [string]$Tags = "",
     [ValidateSet("notes", "experiments", "resources", "paths")]
     [string]$Category = "notes",
-    [int]$MaxImageWidth = 1800,
-    [int]$JpegQuality = 82,
+    [int]$MaxImageWidth = 1400,
+    [int]$JpegQuality = 78,
+    [int]$TargetImageKB = 350,
+    [int]$MinJpegQuality = 52,
     [switch]$Commit,
     [switch]$Push
 )
@@ -96,39 +98,50 @@ function Save-CompressedImage {
             $targetHeight = [int]([double]$image.Height * ($MaxWidth / [double]$image.Width))
         }
 
-        $bitmap = New-Object System.Drawing.Bitmap($targetWidth, $targetHeight)
-        try {
-            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-            try {
-                $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-                $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-                $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-                $graphics.DrawImage($image, 0, 0, $targetWidth, $targetHeight)
-            }
-            finally {
-                $graphics.Dispose()
-            }
+        $currentWidth = $targetWidth
+        $currentHeight = $targetHeight
+        $currentQuality = $Quality
+        $targetBytes = $TargetImageKB * 1024
+        $codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() |
+            Where-Object { $_.MimeType -eq "image/jpeg" } |
+            Select-Object -First 1
 
-            $ext = [System.IO.Path]::GetExtension($OutputPath).ToLowerInvariant()
-            if ($ext -in @(".jpg", ".jpeg")) {
-                $codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() |
-                    Where-Object { $_.MimeType -eq "image/jpeg" } |
-                    Select-Object -First 1
+        while ($true) {
+            $bitmap = New-Object System.Drawing.Bitmap($currentWidth, $currentHeight)
+            try {
+                $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+                try {
+                    $graphics.Clear([System.Drawing.Color]::White)
+                    $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+                    $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+                    $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+                    $graphics.DrawImage($image, 0, 0, $currentWidth, $currentHeight)
+                }
+                finally {
+                    $graphics.Dispose()
+                }
+
                 $encoder = [System.Drawing.Imaging.Encoder]::Quality
                 $encoderParams = New-Object System.Drawing.Imaging.EncoderParameters(1)
-                $encoderParams.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter($encoder, [long]$Quality)
+                $encoderParams.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter($encoder, [long]$currentQuality)
                 $bitmap.Save($OutputPath, $codec, $encoderParams)
                 $encoderParams.Dispose()
+
+                $size = (Get-Item -LiteralPath $OutputPath).Length
+                if ($size -le $targetBytes -or ($currentQuality -le $MinJpegQuality -and $currentWidth -le 900)) {
+                    break
+                }
+                if ($currentQuality -gt $MinJpegQuality) {
+                    $currentQuality = [Math]::Max($MinJpegQuality, $currentQuality - 8)
+                }
+                else {
+                    $currentWidth = [Math]::Max(900, [int]($currentWidth * 0.85))
+                    $currentHeight = [int]([double]$image.Height * ($currentWidth / [double]$image.Width))
+                }
             }
-            elseif ($ext -eq ".png") {
-                $bitmap.Save($OutputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+            finally {
+                $bitmap.Dispose()
             }
-            else {
-                Copy-Item -LiteralPath $InputPath -Destination $OutputPath -Force
-            }
-        }
-        finally {
-            $bitmap.Dispose()
         }
     }
     finally {
@@ -149,15 +162,18 @@ function Copy-NoteImage {
         return $Copied[$resolved]
     }
 
-    $safeName = Convert-ToSafeFileName -Name (Split-Path -Leaf $resolved) -Index $Counter.Value
-    $Counter.Value++
-    $dest = Join-Path $AssetsDir $safeName
-
     $ext = [System.IO.Path]::GetExtension($resolved).ToLowerInvariant()
     if ($ext -in @(".png", ".jpg", ".jpeg")) {
+        $safeName = Convert-ToSafeFileName -Name (Split-Path -Leaf $resolved) -Index $Counter.Value
+        $safeName = [System.IO.Path]::ChangeExtension($safeName, ".jpg")
+        $Counter.Value++
+        $dest = Join-Path $AssetsDir $safeName
         Save-CompressedImage -InputPath $resolved -OutputPath $dest -MaxWidth $MaxImageWidth -Quality $JpegQuality
     }
     else {
+        $safeName = Convert-ToSafeFileName -Name (Split-Path -Leaf $resolved) -Index $Counter.Value
+        $Counter.Value++
+        $dest = Join-Path $AssetsDir $safeName
         Copy-Item -LiteralPath $resolved -Destination $dest -Force
     }
 
@@ -218,10 +234,27 @@ function Update-NotesIndex {
         $content = $content.TrimEnd() + $section
     }
 
-    $escapedYear = [regex]::Escape($Year)
-    $pattern = "(?ms)(^##\s+$escapedYear\s*`r?`n\s*`r?`n\| 日期 \| 标题 \| 状态 \| 主题 \|`r?`n\|---\|---\|---\|---\|`r?`n)"
-    $newContent = [regex]::Replace($content, $pattern, "`${1}$Row`n", 1)
-    Set-Content -LiteralPath $Path -Value $newContent -Encoding UTF8
+    $lines = [System.Collections.Generic.List[string]]::new()
+    $lines.AddRange(($content -split "`r?`n"))
+    $yearLine = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match "^##\s+$([regex]::Escape($Year))\s*$") {
+            $yearLine = $i
+            break
+        }
+    }
+
+    if ($yearLine -ge 0) {
+        $insertAt = $yearLine + 1
+        while ($insertAt -lt $lines.Count -and $lines[$insertAt] -notmatch '^\|---\|---\|---\|---\|') {
+            $insertAt++
+        }
+        if ($insertAt -lt $lines.Count) {
+            $lines.Insert($insertAt + 1, $Row)
+        }
+    }
+
+    Set-Content -LiteralPath $Path -Value ($lines -join "`n") -Encoding UTF8
 }
 
 function Update-DatedCategoryIndex {

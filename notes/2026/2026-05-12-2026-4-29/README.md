@@ -16,28 +16,29 @@ tags: "weekly-report"
 
 材质上：
 
-![image.png](assets/01-image.png)
+![image.png](assets/01-image.jpg)
 
 ↑ 使用网格+进行材质融合
 
-![image.png](assets/02-image-1.png)
+![image.png](assets/02-image-1.jpg)
 
 ↑ ps中提取线稿，适当加强西湖周边区域线条的存在感。
 
-![image.png](assets/03-image-2.png)
+![image.png](assets/03-image-2.jpg)
 
 ↑ 与网格材质叠加，保留区域划分形状的同时可以增加材质（线框）感
 
-![image.png](assets/04-image-3.png)
+![image.png](assets/04-image-3.jpg)
 
 优化了水的质感
 
 ### 最终效果展示
 
-![v6.png](assets/05-v6.png)
+![v6.png](assets/05-v6.jpg)
 
-![image.png](assets/06-image-4.png)
+![image.png](assets/06-image-4.jpg)
 
 ai辅助排版，人工检查修改润色
 
-![排版-1_画板 1_画板 1_画板 1.png](assets/07-排版-1-画板-1-画板-1-画板-1.png)
+![排版-1_画板 1_画板 1_画板 1.png](assets/07-排版-1-画板-1-画板-1-画板-1.jpg)
+
