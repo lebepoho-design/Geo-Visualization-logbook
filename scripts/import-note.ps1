@@ -258,6 +258,31 @@ function Update-DatedCategoryIndex {
     Set-Content -LiteralPath $Path -Value $newContent -Encoding UTF8
 }
 
+function Expand-NestedZipFiles {
+    param(
+        [string]$Root
+    )
+
+    $round = 0
+    while ($round -lt 5) {
+        $round++
+        $zipFiles = Get-ChildItem -LiteralPath $Root -Recurse -File -Filter *.zip | Sort-Object FullName
+
+        if (-not $zipFiles -or $zipFiles.Count -eq 0) {
+            return
+        }
+
+        foreach ($zip in $zipFiles) {
+            $target = Join-Path $zip.DirectoryName ("__expanded_zip_" + [System.IO.Path]::GetFileNameWithoutExtension($zip.Name))
+            if (Test-Path -LiteralPath $target) {
+                continue
+            }
+            New-Item -ItemType Directory -Force -Path $target | Out-Null
+            Expand-Archive -LiteralPath $zip.FullName -DestinationPath $target -Force
+        }
+    }
+}
+
 $repoRoot = Get-RepoRoot
 $sourcePath = Resolve-Path -LiteralPath $Source
 $cleanupDir = $null
@@ -270,10 +295,12 @@ if (-not (Test-Path -LiteralPath $sourcePath.Path -PathType Container)) {
     $cleanupDir = Join-Path $env:TEMP ("geo-logbook-notion-" + [guid]::NewGuid().ToString("N"))
     New-Item -ItemType Directory -Force -Path $cleanupDir | Out-Null
     Expand-Archive -LiteralPath $sourcePath.Path -DestinationPath $cleanupDir -Force
+    Expand-NestedZipFiles -Root $cleanupDir
     $sourceDir = $cleanupDir
 }
 else {
     $sourceDir = $sourcePath.Path
+    Expand-NestedZipFiles -Root $sourceDir
 }
 
 $year = ([datetime]::ParseExact($Date, "yyyy-MM-dd", $null)).ToString("yyyy")
@@ -408,6 +435,7 @@ if ($Push) {
 if ($cleanupDir -and (Test-Path -LiteralPath $cleanupDir)) {
     Remove-Item -LiteralPath $cleanupDir -Recurse -Force
 }
+
 
 
 

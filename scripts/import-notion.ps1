@@ -24,19 +24,23 @@ $argsList = @(
     "-Category", $Category,
     "-Date", $Date,
     "-Status", $Status,
-    "-Tags", $Tags,
     "-MaxImageWidth", $MaxImageWidth,
-    "-JpegQuality", $JpegQuality,
-    "-Commit"
+    "-JpegQuality", $JpegQuality
 )
 
 if (-not [string]::IsNullOrWhiteSpace($Title)) {
     $argsList += @("-Title", $Title)
 }
 
+if (-not [string]::IsNullOrWhiteSpace($Tags)) {
+    $argsList += @("-Tags", $Tags)
+}
+
 if (-not $NoPush) {
-    $argsList += "-Push"
+    $argsList += @("-Commit", "-Push")
 }
 
 & powershell @argsList
+exit $LASTEXITCODE
+
 

@@ -9,6 +9,16 @@
 3. 把导出的 `.zip` 放到 `inbox/`
 3. 在仓库根目录运行：
 
+直接双击仓库根目录的：
+
+```text
+Import Notion Export.bat
+```
+
+它会自动选择 `inbox/` 中最新的 `.zip` 文件导入。
+
+或手动指定：
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Category notes -Tags "Photoshop, DEM, 等高线"
 ```

@@ -17,6 +17,16 @@
 
 把 Notion 导出的 `.zip` 放进 `inbox/`，然后运行：
 
+双击：
+
+```text
+Import Notion Export.bat
+```
+
+它会自动导入 `inbox/` 里最新的 Notion 导出 zip。
+
+也可以手动运行：
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Tags "QGIS, DEM, Photoshop"
 ```
