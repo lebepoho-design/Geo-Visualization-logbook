@@ -2,9 +2,6 @@
     [Parameter(Mandatory = $true)]
     [string]$Source,
 
-    [ValidateSet("notes", "experiments", "resources", "paths")]
-    [string]$Category = "notes",
-
     [string]$Title = "",
     [string]$Date = (Get-Date -Format "yyyy-MM-dd"),
     [string]$Status = "进行中",
@@ -23,13 +20,13 @@ Set-Location -LiteralPath $repoRoot
 $importScript = Join-Path $scriptDir "import-note.ps1"
 
 Write-Host "Repository: $repoRoot"
-Write-Host "Category: $Category"
+Write-Host "Category: notes"
 
 $argsList = @(
     "-ExecutionPolicy", "Bypass",
     "-File", $importScript,
     "-Source", $Source,
-    "-Category", $Category,
+    "-Category", "notes",
     "-Date", $Date,
     "-Status", $Status,
     "-MaxImageWidth", $MaxImageWidth,

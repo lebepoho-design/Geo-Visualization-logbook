@@ -1,47 +1,36 @@
 # Geo-Visualization-logbook
 
-个人地理可视化设计学习记录，持续更新完善中。
+个人地理可视化设计学习记录。日常在 Notion 中手写和编辑，导出 Markdown zip 后，一键整理到本仓库的 `notes/` 中。
 
-这个仓库用于沉淀我的地理可视化学习路径、工具实验、案例观察和阶段性作品。它不是一次性作品集，而是一个长期更新的学习档案。
+## Notes
 
-## 导航
+## 2026
 
-| 位置 | 内容 |
-|---|---|
-| [notes](notes/README.md) | 学习笔记、过程记录、问题复盘 |
-| [paths](paths/README.md) | 学习路径与阶段目标 |
-| [resources](resources/README.md) | 数据、工具、参考资料 |
-| [experiments](experiments/README.md) | 小实验、流程验证、可视化草稿 |
+| 日期 | 标题 | 状态 | 主题 |
+|---|---|---|---|
+| 2026-05-12 | [2026/4/29](notes/2026/2026-05-12-2026-4-29/) | 进行中 | weekly-report |
 
-## 快速导入笔记
+## 2025
 
-把 Notion 导出的 `.zip` 放进 `inbox/`，然后运行：
+| 日期 | 标题 | 状态 | 主题 |
+|---|---|---|---|
+| 2025-11-25 | [使用 Photoshop 将 DEM 灰度图转化为等高线风格](notes/2025/2025-11-25-ps-dem-contours/) | 进行中 | Photoshop, DEM, 等高线 |
 
-双击：
+## Workflow
+
+1. 在 Notion 中记录和编辑笔记。
+2. 从 Notion 导出 `Markdown & CSV` zip。
+3. 把 zip 放入 `inbox/`。
+4. 双击 `Import Notion Export.bat`。
+5. 确认无误后在 GitHub Desktop 提交，或在脚本提示中选择自动提交上传。
+
+## Repository Structure
 
 ```text
-Import Notion Export.bat
+Geo-Visualization-logbook/
+├── README.md                 # GitHub 首页与笔记列表
+├── notes/                    # 归档后的学习记录
+├── inbox/                    # Notion 导出 zip 临时放置区
+├── scripts/                  # 自动导入脚本
+└── Import Notion Export.bat  # 双击导入入口
 ```
-
-它会自动导入 `inbox/` 里最新的 Notion 导出 zip。
-
-也可以手动运行：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Tags "QGIS, DEM, Photoshop"
-```
-
-脚本会自动读取 Notion Markdown 标题，整理到 `notes/YYYY/YYYY-MM-DD-topic/`，压缩图片，修正图片路径，更新笔记索引，并自动 commit + push。
-
-如果想先检查再上传，加 `-NoPush`：
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Tags "QGIS, DEM" -NoPush
-```
-
-## 记录原则
-
-- 一篇笔记一个文件夹，正文使用 `README.md`，图片放入同级 `assets/`。
-- 文件夹命名使用 `YYYY-MM-DD-topic-slug`，方便按时间排序。
-- 每篇笔记尽量记录：问题、尝试、失败、修正、结果、下一步。
-- 大型源文件、临时文件和云盘同步文件不放入仓库。

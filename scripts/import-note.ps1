@@ -471,6 +471,7 @@ foreach ($img in $allImages) {
 
 $entryRel = "$Category/$year/$Date-$slug/"
 $rowForMain = "| $Date | [$Title]($year/$Date-$slug/) | $Status | $Tags |"
+$rowForRoot = "| $Date | [$Title](notes/$year/$Date-$slug/) | $Status | $Tags |"
 $rowForYear = "| $Date | [$Title]($Date-$slug/) | $Status | $Tags |"
 
 $notesHeader = @"
@@ -492,6 +493,7 @@ $yearHeader = @"
 "@
 
 if ($Category -eq "notes") {
+    Update-NotesIndex -Path (Join-Path $repoRoot "README.md") -Year $year -Row $rowForRoot
     Update-NotesIndex -Path (Join-Path $repoRoot "notes\README.md") -Year $year -Row $rowForMain
 }
 else {

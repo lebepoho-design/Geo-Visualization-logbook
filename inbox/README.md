@@ -1,6 +1,6 @@
 # Inbox
 
-把 Notion 导出的 Markdown 或 zip 放到这里，然后用脚本导入到仓库。
+把 Notion 导出的 Markdown zip 放到这里，然后用脚本导入到 `notes/`。
 
 推荐流程：
 
@@ -20,7 +20,7 @@ Import Notion Export.bat
 或手动指定：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Category notes -Tags "Photoshop, DEM, 等高线"
+powershell -ExecutionPolicy Bypass -File .\scripts\import-notion.ps1 -Source .\inbox\notion-export.zip -Tags "Photoshop, DEM, 等高线"
 ```
 
 脚本会自动：
