@@ -17,7 +17,13 @@
 )
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoRoot = Split-Path -Parent $scriptDir
+Set-Location -LiteralPath $repoRoot
+
 $importScript = Join-Path $scriptDir "import-note.ps1"
+
+Write-Host "Repository: $repoRoot"
+Write-Host "Category: $Category"
 
 $argsList = @(
     "-ExecutionPolicy", "Bypass",

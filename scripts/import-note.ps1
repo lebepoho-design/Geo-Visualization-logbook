@@ -20,6 +20,15 @@
 $ErrorActionPreference = "Stop"
 
 function Get-RepoRoot {
+    $scriptDir = Split-Path -Parent $MyInvocation.ScriptName
+    if ($scriptDir) {
+        $rootFromScript = Split-Path -Parent $scriptDir
+        if ((Test-Path -LiteralPath (Join-Path $rootFromScript ".git")) -or (Test-Path -LiteralPath (Join-Path $rootFromScript "README.md"))) {
+            Set-Location -LiteralPath $rootFromScript
+            return $rootFromScript
+        }
+    }
+
     $root = git rev-parse --show-toplevel 2>$null
     if (-not $root) {
         throw "请在 Git 仓库中运行此脚本。"
@@ -354,6 +363,7 @@ function Expand-NestedZipFiles {
 }
 
 $repoRoot = Get-RepoRoot
+Set-Location -LiteralPath $repoRoot
 $sourcePath = Resolve-Path -LiteralPath $Source
 $cleanupDir = $null
 

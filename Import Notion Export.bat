@@ -40,10 +40,19 @@ set "TAGS="
 set /p "TAGS=Tags (optional, press Enter to skip): "
 echo.
 
+set "UPLOAD="
+set /p "UPLOAD=Commit and push automatically? (y/N): "
+echo.
+
+set "EXTRA_ARGS=-NoPush"
+if /i "%UPLOAD%"=="y" (
+  set "EXTRA_ARGS="
+)
+
 if "%TAGS%"=="" (
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\scripts\import-notion.ps1" -Source "%CD%\%ZIP_FILE%"
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\scripts\import-notion.ps1" -Source "%CD%\%ZIP_FILE%" %EXTRA_ARGS%
 ) else (
-  powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\scripts\import-notion.ps1" -Source "%CD%\%ZIP_FILE%" -Tags "%TAGS%"
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\scripts\import-notion.ps1" -Source "%CD%\%ZIP_FILE%" -Tags "%TAGS%" %EXTRA_ARGS%
 )
 
 echo.
