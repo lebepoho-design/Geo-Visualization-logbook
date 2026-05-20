@@ -505,7 +505,7 @@ Write-Host "导入完成: $entryRel"
 Write-Host "图片数量: $($copiedImages.Count)"
 
 if ($Commit) {
-    git add notes experiments resources paths .gitignore inbox scripts README.md
+    git add README.md notes inbox scripts .gitignore "Import Notion Export.bat"
     git commit -m "Add note: $Title"
 }
 
