@@ -291,6 +291,42 @@ function Update-DatedCategoryIndex {
     Set-Content -LiteralPath $Path -Value $newContent -Encoding UTF8
 }
 
+function New-ShortImportTempDir {
+    $base = "C:\tmp"
+    try {
+        if (-not (Test-Path -LiteralPath $base)) {
+            New-Item -ItemType Directory -Force -Path $base | Out-Null
+        }
+    }
+    catch {
+        $base = $env:TEMP
+    }
+
+    $dir = Join-Path $base ("gli-" + [guid]::NewGuid().ToString("N").Substring(0, 8))
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    return $dir
+}
+
+function Expand-ZipSafely {
+    param(
+        [string]$ZipPath,
+        [string]$Destination
+    )
+
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+
+    try {
+        Expand-Archive -LiteralPath $ZipPath -DestinationPath $Destination -Force
+    }
+    catch {
+        Write-Warning "Expand-Archive failed; falling back to tar for: $ZipPath"
+        & tar -xf $ZipPath -C $Destination
+        if ($LASTEXITCODE -ne 0) {
+            throw "解压失败: $ZipPath"
+        }
+    }
+}
+
 function Expand-NestedZipFiles {
     param(
         [string]$Root
@@ -305,13 +341,14 @@ function Expand-NestedZipFiles {
             return
         }
 
+        $index = 0
         foreach ($zip in $zipFiles) {
-            $target = Join-Path $zip.DirectoryName ("__expanded_zip_" + [System.IO.Path]::GetFileNameWithoutExtension($zip.Name))
+            $index++
+            $target = Join-Path $zip.DirectoryName ("__z" + $round + "_" + $index)
             if (Test-Path -LiteralPath $target) {
                 continue
             }
-            New-Item -ItemType Directory -Force -Path $target | Out-Null
-            Expand-Archive -LiteralPath $zip.FullName -DestinationPath $target -Force
+            Expand-ZipSafely -ZipPath $zip.FullName -Destination $target
         }
     }
 }
@@ -325,9 +362,8 @@ if (-not (Test-Path -LiteralPath $sourcePath.Path -PathType Container)) {
     if ($ext -ne ".zip") {
         throw "Source 必须是 Notion 导出的 .zip、或包含 Markdown 的文件夹。"
     }
-    $cleanupDir = Join-Path $env:TEMP ("geo-logbook-notion-" + [guid]::NewGuid().ToString("N"))
-    New-Item -ItemType Directory -Force -Path $cleanupDir | Out-Null
-    Expand-Archive -LiteralPath $sourcePath.Path -DestinationPath $cleanupDir -Force
+    $cleanupDir = New-ShortImportTempDir
+    Expand-ZipSafely -ZipPath $sourcePath.Path -Destination $cleanupDir
     Expand-NestedZipFiles -Root $cleanupDir
     $sourceDir = $cleanupDir
 }
